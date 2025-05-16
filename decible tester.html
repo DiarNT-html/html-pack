@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decibel Tester</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            overflow: hidden;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            filter: blur(10px);
+            z-index: -1;
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        #decibel {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+            animation: pulse 1s infinite;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: #ff5722;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+        button:active {
+            transform: scale(1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <h1>Decibel Tester</h1>
+    <p>Current Decibel Level: <span id="decibel">0</span> dB</p>
+    <button id="startButton">Start Testing</button>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const decibelDisplay = document.getElementById('decibel');
+        let audioContext, analyser, microphone, scriptProcessor;
+        let isTesting = false;
+
+        startButton.addEventListener('click', async () => {
+            if (isTesting) {
+                // Stop testing
+                audioContext.close();
+                startButton.textContent = "Start Testing";
+                isTesting = false;
+                return;
+            }
+
+            // Start testing
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                microphone = audioContext.createMediaStreamSource(stream);
+                scriptProcessor = audioContext.createScriptProcessor(256, 1, 1);
+
+                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 256;
+
+                microphone.connect(analyser);
+                analyser.connect(scriptProcessor);
+                scriptProcessor.connect(audioContext.destination);
+
+                scriptProcessor.onaudioprocess = () => {
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(dataArray);
+                    const sum = dataArray.reduce((a, b) => a + b, 0);
+                    const average = sum / dataArray.length;
+                    const decibel = Math.round(20 * Math.log10(average || 1));
+                    decibelDisplay.textContent = decibel;
+
+                    // Change text color based on decibel level
+                    if (decibel < 50) {
+                        decibelDisplay.style.color = "green"; // Low decibels
+                    } else if (decibel >= 50 && decibel < 100) {
+                        decibelDisplay.style.color = "yellow"; // Medium decibels
+                    } else {
+                        decibelDisplay.style.color = "red"; // High decibels
+                    }
+                };
+
+                startButton.textContent = "Stop Testing";
+                isTesting = true;
+            } catch (err) {
+                alert('Error accessing microphone: ' + err.message);
+            }
+        });
+    </script>
+</body>
+</html>

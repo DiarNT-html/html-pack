@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windows Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+    }
+
+    #loader-screen {
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-text {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .progress-container {
+      width: 60%;
+      height: 20px;
+      background-color: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #2196f3;
+      transition: width 4s linear;
+    }
+
+    #desktop {
+      display: none;
+      background-color: #0078d7;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    #recycle-bin {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-align: center;
+    }
+
+    #recycle-bin img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .start-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #2196f3;
+      border: none;
+      cursor: pointer;
+    }
+
+    .start-menu {
+      position: absolute;
+      bottom: 60px;
+      left: 10px;
+      width: 200px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+    }
+
+    .start-menu .user {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .shutdown-button {
+      margin-top: 10px;
+      padding: 8px;
+      width: 100%;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="loader-screen">
+    <div class="loading-text">Loading Windows Simulator...</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <div id="desktop">
+    <div id="recycle-bin">
+      <img src="https://upload.wikimedia.org/wikipedia/en/6/60/Recycle_Bin_Full_Windows_10_Icon.png" alt="Recycle Bin" />
+      <div>Recycle Bin</div>
+    </div>
+
+    <div class="taskbar">
+      <button class="start-button" onclick="toggleMenu()"></button>
+      <div class="start-menu" id="start-menu">
+        <div class="user">User</div>
+        <button class="shutdown-button">Shut Down</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const progressBar = document.getElementById('progress-bar');
+    const loaderScreen = document.getElementById('loader-screen');
+    const desktop = document.getElementById('desktop');
+
+    // Animate loading bar
+    setTimeout(() => {
+      progressBar.style.width = '100%';
+    }, 100);
+
+    // Show desktop after loading
+    setTimeout(() => {
+      loaderScreen.style.display = 'none';
+      desktop.style.display = 'block';
+    }, 4100);
+
+    function toggleMenu() {
+      const menu = document.getElementById('start-menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+  </script>
+</body>
+</html>

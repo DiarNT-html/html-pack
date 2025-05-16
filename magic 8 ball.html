@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magic 8 Ball</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #282c34;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      margin-top: 100px;
+    }
+    .ball {
+      width: 200px;
+      height: 200px;
+      background-color: black;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
+      position: relative;
+    }
+    .ball-text {
+      color: white;
+      font-size: 20px;
+      text-align: center;
+      padding: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #61dafb;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #21a1f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Magic 8 Ball</h1>
+    <div class="ball">
+      <div class="ball-text" id="answer">Ask a question</div>
+    </div>
+    <button onclick="shakeBall()">Shake the Ball</button>
+  </div>
+
+  <script>
+    const answers = [
+      "Yes", "No", "Maybe", "Ask again later", 
+      "Definitely", "I don't think so", 
+      "It is certain", "Very doubtful"
+    ];
+
+    function shakeBall() {
+      const randomIndex = Math.floor(Math.random() * answers.length);
+      const answer = answers[randomIndex];
+      document.getElementById('answer').textContent = answer;
+    }
+  </script>
+</body>
+</html>

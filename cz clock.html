@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Czech Time Clock</title>
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .clock {
+      background: #fff;
+      padding: 30px 50px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      font-size: 3rem;
+      color: #333;
+    }
+    .label {
+      font-size: 1rem;
+      margin-top: 10px;
+      text-align: center;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="clock-container">
+    <div class="clock" id="czechClock">--:--:--</div>
+    <div class="label">Czech Time (Europe/Prague)</div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const options = {
+        timeZone: 'Europe/Prague',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const formatter = new Intl.DateTimeFormat([], options);
+      document.getElementById('czechClock').textContent = formatter.format(new Date());
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock(); // Initial call
+  </script>
+</body>
+</html>

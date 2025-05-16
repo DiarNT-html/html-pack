@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>PIN Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #0f172a, #1e293b);
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen text-white">
+  <div id="root"></div>
+
+  <script type="text/javascript">
+    const { useState, useEffect, useRef } = React;
+
+    function TypingText({ text, className }) {
+      const [displayed, setDisplayed] = useState("");
+      const index = useRef(0);
+
+      useEffect(() => {
+        setDisplayed("");
+        index.current = 0;
+        const interval = setInterval(() => {
+          if (index.current < text.length) {
+            setDisplayed((prev) => prev + text[index.current]);
+            index.current++;
+          } else {
+            clearInterval(interval);
+          }
+        }, 50);
+        return () => clearInterval(interval);
+      }, [text]);
+
+      return React.createElement("h1", { className }, displayed);
+    }
+
+    function App() {
+      const [step, setStep] = useState("amount");
+      const [input, setInput] = useState("");
+      const [verifyText, setVerifyText] = useState("Ověřování kartu...");
+      const inputRef = useRef(null);
+
+      useEffect(() => {
+        inputRef.current?.focus();
+      }, [step]);
+
+      useEffect(() => {
+        if (step === "verify") {
+          const t1 = setTimeout(() => setVerifyText("Hotovo!"), 2000);
+          const t2 = setTimeout(() => window.close(), 4000);
+          return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+          };
+        }
+      }, [step]);
+
+      const handleKeyDown = (e) => {
+        if (e.key === "Enter" && input.trim() !== "") {
+          if (step === "amount") {
+            setInput("");
+            setStep("pin");
+          } else if (step === "pin") {
+            setInput("");
+            setStep("verify");
+          }
+        }
+      };
+
+      if (step === "amount") {
+        return React.createElement(
+          "div",
+          { className: "flex flex-col items-center gap-6" },
+          React.createElement(TypingText, {
+            text: "Kolik Kč?",
+            className: "text-3xl font-bold text-white/90",
+          }),
+          React.createElement("input", {
+            ref: inputRef,
+            value: input,
+            onChange: (e) => setInput(e.target.value),
+            onKeyDown: handleKeyDown,
+            placeholder: "Zadejte částku",
+            className: "w-64 px-4 py-2 text-xl text-white bg-white/10 border border-white/30 rounded-xl focus:outline-none text-center",
+          })
+        );
+      }
+
+      if (step === "pin") {
+        return React.createElement(
+          "div",
+          { className: "flex flex-col items-center gap-6" },
+          React.createElement(TypingText, {
+            text: "Napište váš kód od karty",
+            className: "text-2xl font-semibold text-white/90",
+          }),
+          React.createElement("input", {
+            ref: inputRef,
+            type: "password",
+            value: input,
+            onChange: (e) => setInput(e.target.value),
+            onKeyDown: handleKeyDown,
+            placeholder: "****",
+            className: "w-64 px-4 py-2 text-xl text-white bg-white/10 border border-white/30 rounded-xl focus:outline-none text-center tracking-widest",
+          })
+        );
+      }
+
+      if (step === "verify") {
+        return React.createElement(
+          "div",
+          { className: "flex items-center justify-center h-screen w-screen" },
+          React.createElement("h1", {
+            className: "text-2xl font-medium text-white animate-pulse",
+            children: verifyText,
+          })
+        );
+      }
+    }
+
+    ReactDOM.render(React.createElement(App), document.getElementById("root"));
+  </script>
+</body>
+</html>

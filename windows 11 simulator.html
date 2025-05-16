@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 11 Setup</title>
+    <style>
+        /* Custom Cursor Styles */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 0, 0, 0.7);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            mix-blend-mode: difference;
+        }
+        
+        .custom-cursor.clicked {
+            transform: translate(-50%, -50%) scale(0.7);
+            background-color: rgba(0, 0, 255, 0.9);
+        }
+        
+        /* Hide default cursor */
+        body {
+            cursor: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #180052;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .setup-container {
+            width: 800px;
+            height: 600px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .setup-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setup-content {
+            padding: 30px;
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .setup-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-next {
+            background-color: #0067C0;
+            color: white;
+        }
+
+        .btn-back {
+            background-color: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-option {
+            display: block;
+            width: 300px;
+            margin: 15px auto;
+            padding: 12px;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-option:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-steps {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .progress-step {
+            position: relative;
+        }
+
+        .progress-step.active {
+            font-weight: bold;
+            opacity: 1;
+        }
+
+        .install-progress {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .install-progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #0067C0;
+            transition: width 0.5s;
+        }
+
+        .install-status {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .install-status-percent {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .option-description {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* Windows 11 Desktop */
+        .windows-desktop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0078d7;
+            background-image: url('https://4kwallpapers.com/images/walls/thumbs_3t/16834.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 1000;
+        }
+        .desktop-icon {
+            position: absolute;
+            width: 80px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            cursor: pointer;
+        }
+        .recycle-bin {
+            top: 20px;
+            left: 20px;
+            background-image: url('https://winaero.com/blog/wp-content/uploads/2021/07/Recycle-bin-windows-11-icon.png');
+            background-size: 40px 40px;
+            background-repeat: no-repeat;
+            background-position: center 0;
+            padding-top: 45px;
+            filter: brightness(0) invert(1);
+        }
+        .command-prompt {
+            top: 120px;
+            left: 20px;
+            background-image: url('https://winaero.com/blog/wp-content/uploads/2019/06/WIndows-Terminal-icon.png');
+            background-size: 40px 40px;
+            background-repeat: no-repeat;
+            background-position: center 0;
+            padding-top: 45px;
+        }
+        .taskbar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 48px;
+            background-color: rgba(32, 32, 32, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            gap: 30px;
+        }
+        .taskbar-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .windows-logo {
+            width: 24px;
+            height: 24px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Windows_logo_-_2021.svg/1024px-Windows_logo_-_2021.svg.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+        }
+        .search-icon {
+            width: 24px;
+            height: 24px;
+            background-image: url('https://img.icons8.com/?size=512&id=KPmthqkeTgDN&format=png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: brightness(0) invert(1);
+            cursor: pointer;
+        }
+        .battery-percent {
+            font-size: 14px;
+            color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin-right: 10px;
+        }
+        .time-display {
+            position: absolute;
+            right: 20px;
+            font-size: 14px;
+            color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .time-display:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Search Panel */
+        .search-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 500px;
+            background-color: rgba(32, 32, 32, 0.95);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+        .search-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .search-panel-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .search-panel-input {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            padding: 12px 15px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+        .search-panel-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        .search-panel-section {
+            margin-bottom: 20px;
+        }
+        .search-panel-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+        .search-panel-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+        .search-panel-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .search-panel-item-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        .search-panel-item-text {
+            font-size: 14px;
+        }
+
+        /* Calendar Popup */
+        .calendar-popup {
+            position: absolute;
+            bottom: 50px;
+            right: 0;
+            width: 300px;
+            background-color: rgba(32, 32, 32, 0.95);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            z-index: 1001;
+        }
+        .calendar-popup.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-month-year {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+        .calendar-nav button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        .calendar-nav button:hover {
+            opacity: 1;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .calendar-day-header {
+            font-size: 12px;
+            opacity: 0.7;
+            padding: 5px 0;
+        }
+        .calendar-day {
+            padding: 8px 0;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .calendar-day:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .calendar-day.today {
+            background-color: #0067C0;
+            font-weight: bold;
+        }
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        /* Start Menu */
+        .start-menu {
+            position: absolute;
+            bottom: 48px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            width: 600px;
+            background-color: rgba(32, 32, 32, 0.95);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 1001;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .start-menu.visible {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+            pointer-events: auto;
+        }
+        .search-box {
+            grid-column: span 2;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .search-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            padding: 5px;
+        }
+        .menu-section {
+            margin-bottom: 15px;
+        }
+        .menu-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        .menu-item-text {
+            font-size: 14px;
+        }
+        .menu-item-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-left: auto;
+        }
+        .menu-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            grid-column: span 2;
+        }
+
+        /* Command Prompt Window */
+        .cmd-window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 600px;
+            height: 400px;
+            background-color: #0C0C0C;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+        .cmd-window.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+        .cmd-titlebar {
+            height: 32px;
+            background-color: #2D2D2D;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            cursor: move;
+        }
+        .cmd-title {
+            font-size: 12px;
+            color: white;
+        }
+        .cmd-close {
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        .cmd-close:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .cmd-content {
+            flex: 1;
+            padding: 10px;
+            color: #CCCCCC;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .cmd-input {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #0C0C0C;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .cmd-prompt {
+            color: #4EC9B0;
+            margin-right: 8px;
+        }
+        .cmd-input-field {
+            flex: 1;
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            outline: none;
+        }
+        .cmd-input-line {
+            color: white;
+        }
+        .cmd-cursor {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Chrome Window */
+        .chrome-window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            z-index: 1004;
+            display: flex;
+            flex-direction: column;
+        }
+        .chrome-titlebar {
+            height: 40px;
+            background-color: #f1f1f1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .chrome-title {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        .chrome-close {
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border: none;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .chrome-close:hover {
+            background-color: #e0e0e0;
+        }
+        .chrome-toolbar {
+            height: 40px;
+            background-color: #f8f8f8;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .chrome-address-bar {
+            flex: 1;
+            height: 30px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            padding: 0 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .chrome-content {
+            flex: 1;
+            background-color: white;
+            border: none;
+            width: 100%;
+        }
+        .chrome-tabs {
+            display: flex;
+            padding: 5px 10px;
+            background-color: #f1f1f1;
+            border-bottom: 1px solid #ddd;
+        }
+        .chrome-tab {
+            padding: 8px 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .chrome-tab.active {
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #f8f8f8;
+            margin-bottom: -1px;
+        }
+        .chrome-search-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+        }
+        .chrome-logo {
+            width: 150px;
+            height: 56px;
+            margin-bottom: 20px;
+            background-image: url('https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .chrome-search {
+            width: 500px;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0 20px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .chrome-search-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .chrome-search-btn {
+            padding: 8px 16px;
+            background-color: #f8f8f8;
+            border: 1px solid #f8f8f8;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chrome-search-btn:hover {
+            border: 1px solid #ddd;
+        }
+        .chrome-iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .chrome-iframe-fallback {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .chrome-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Windows 1.0 Desktop */
+        .win10-desktop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #008080;
+            background-image: url('https://static.wikia.nocookie.net/windows/images/3/3c/Windows_1.0_desktop-0/revision/latest?cb=20190601164905');
+            background-size: cover;
+            background-position: center;
+            z-index: 1003;
+            display: none;
+        }
+        .win10-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #C0C0C0;
+            border: 2px solid white;
+            color: black;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor Element -->
+    <div class="custom-cursor" id="customCursor"></div>
+
+    <div class="setup-container">
+        <div class="setup-header">
+            <h2>Windows Setup</h2>
+        </div>
+
+        <!-- Theme 1: Language Selection -->
+        <div class="setup-content" id="theme1">
+            <h3>Windows</h3>
+            <div style="margin: 30px 0;">
+                <div style="margin-bottom: 20px;">
+                    <label>Language to install:</label>
+                    <select style="width: 100%; padding: 8px; margin-top: 5px; background-color: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
+                        <option>English (United States)</option>
+                        <option>English (United Kingdom)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label>Time and currency format:</label>
+                    <select style="width: 100%; padding: 8px; margin-top: 5px; background-color: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
+                        <option>English (United States)</option>
+                        <option>English (United Kingdom)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Keyboard or input method:</label>
+                    <select style="width: 100%; padding: 8px; margin-top: 5px; background-color: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
+                        <option>US</option>
+                        <option>UK</option>
+                    </select>
+                </div>
+            </div>
+            <p style="font-size: 12px; opacity: 0.7; text-align: center;">Microsoft Corporation. All rights reserved.</p>
+        </div>
+
+        <!-- Theme 2: Install or Repair -->
+        <div class="setup-content hidden" id="theme2">
+            <h3>Windows</h3>
+            <div style="text-align: center; margin-top: 100px;">
+                <button class="btn btn-next" id="installBtn" style="width: 200px; margin-bottom: 20px;">Install now</button><br>
+                <button class="btn btn-back" id="repairBtn" style="width: 200px;">Repair your computer</button>
+            </div>
+            <p style="font-size: 12px; opacity: 0.7; text-align: center; margin-top: 100px;">Microsoft Corporation. All rights reserved.</p>
+        </div>
+
+        <!-- Theme 2a: Troubleshoot Options -->
+        <div class="setup-content hidden" id="theme2a">
+            <h2>Choose an option</h2>
+            <button class="btn-option" id="continueBtn">
+                Continue
+                <div class="option-description">Exit and continue to Windows 11</div>
+            </button>
+            <button class="btn-option" id="useDeviceBtn">
+                Use a device
+                <div class="option-description">Use a USB drive, network connection, or Windows recovery DVD</div>
+            </button>
+            <button class="btn-option" id="troubleshootBtn">
+                Troubleshoot
+                <div class="option-description">Reset your PC or see advanced options</div>
+            </button>
+        </div>
+
+        <!-- Theme 3: Product Key -->
+        <div class="setup-content hidden" id="theme3">
+            <h2>Activate Windows</h2>
+            <p>If this is the first time you're installing Windows on this PC (or you're installing a different edition), you need to enter a valid Windows product key.</p>
+            <p>The product key looks like this: XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</p>
+            <div style="margin: 30px 0;">
+                <input type="text" placeholder="Enter product key" style="
+                    padding: 12px;
+                    width: 100%;
+                    background-color: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 4px;
+                    color: white;
+                    font-size: 16px;
+                ">
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="no-key">
+                <label for="no-key">I don't have a product key</label>
+            </div>
+            <p style="font-size: 12px; margin-top: 30px;">Privacy Statement</p>
+        </div>
+
+        <!-- Theme 4: License Terms -->
+        <div class="setup-content hidden" id="theme4">
+            <h2>Applicable notices and license terms</h2>
+            <h3>Last updated May 2025</h3>
+            <h3>MICROSOFT SOFTWARE LICENSE TERMS</h3>
+            <h3>WINDOWS OPERATING SYSTEM</h3>
+            <div class="license-terms">
+                <p>IF YOU LIVE IN (OR IF YOUR PRINCIPAL PLACE OF BUSINESS IS IN) THE UNITED STATES, PLEASE READ THE BINDING ARBITRATION CLAUSE AND CLASS ACTION WAIVER IN SECTION 11. IT AFFECTS HOW DISPUTES ARE RESOLVED.</p>
+                <p>Thank you for choosing Microsoft!</p>
+                <p>By pressing next,you agree to the license terms,This is actually a base off of the regular Windows 11 setup.Before installing,read this license terms.
+1.After reading these license terms click your Windows 11 edition of choice.
+2.Then click the first partition table and then the next button.
+3.Wait untill all of the steps reach 100%,And after that click the finish button and then a Windows 11 desktop should appear</p></div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="accept-terms">
+                <label for="accept-terms">Accept the Microsoft Software License Terms. If an organization is licensing it, I am authorized to bind the organization.</label>
+            </div>
+        </div>
+
+        <!-- Theme 5: OS Selection -->
+        <div class="setup-content hidden" id="theme5">
+            <h2>Select the operating system you want to install</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operating system</th>
+                        <th>Architecture</th>
+                        <th>Date modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Windows 11 Home</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Windows 11 Home N</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Windows 11 Home Single Language</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Windows 11 Education</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Windows 11 Education N</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Windows 11 Pro</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Windows 11 Pro N</td>
+                        <td>x64</td>
+                        <td>02/05/2025</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 20px;">
+                <label>Description:</label>
+                <div style="padding: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; margin-top: 5px;">
+                    Windows 11 Home
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 6: Disk Selection -->
+        <div class="setup-content hidden" id="theme6">
+            <h2>Where do you want to install Windows?</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Total size</th>
+                        <th>Free space</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Drive 0 Unallocated Space</td>
+                        <td>(1.99 TB)</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-back">Refresh</button>
+                <button class="btn btn-back">Delete</button>
+                <button class="btn btn-back">Format</button>
+                <button class="btn btn-back">New</button>
+                <button class="btn btn-back">Load driver</button>
+                <button class="btn btn-back">Extend</button>
+            </div>
+        </div>
+
+        <!-- Theme 7: Installation Progress -->
+        <div class="setup-content hidden" id="theme7">
+            <h2>Installing Windows</h2>
+            <h3>Status</h3>
+            <div class="install-status">
+                <span>Copying Windows files</span>
+                <span class="install-status-percent" id="status1">(0%)</span>
+            </div>
+            <div class="install-status">
+                <span>Getting files ready for installation</span>
+                <span class="install-status-percent" id="status2">(0%)</span>
+            </div>
+            <div class="install-status">
+                <span>Installing features</span>
+                <span class="install-status-percent" id="status3">(0%)</span>
+            </div>
+            <div class="install-status">
+                <span>Installing updates</span>
+                <span class="install-status-percent" id="status4">(0%)</span>
+            </div>
+            <div class="install-status">
+                <span>Finishing up</span>
+                <span class="install-status-percent" id="status5">(0%)</span>
+            </div>
+            <div class="install-progress">
+                <div class="install-progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- Windows 11 Desktop -->
+        <div class="windows-desktop" id="windowsDesktop">
+            <div class="desktop-icon recycle-bin" title="Recycle Bin">Recycle Bin</div>
+            <div class="desktop-icon command-prompt" title="Command Prompt" id="cmdIcon">Command Prompt</div>
+            
+            <!-- Search Panel -->
+            <div class="search-panel" id="searchPanel">
+                <div class="search-panel-header">
+                    <input type="text" class="search-panel-input" placeholder="Type here to search" id="searchPanelInput">
+                </div>
+                <div class="search-panel-content">
+                    <div class="search-panel-section">
+                        <h3>Top apps</h3>
+                        <div class="search-panel-item">
+                            <div class="search-panel-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/9/98/Microsoft_Edge_logo_%282019%29.svg');"></div>
+                            <div class="search-panel-item-text">Microsoft Edge</div>
+                        </div>
+                        <div class="search-panel-item">
+                            <div class="search-panel-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28Windows_10%29.png');"></div>
+                            <div class="search-panel-item-text">Mail</div>
+                        </div>
+                        <div class="search-panel-item">
+                            <div class="search-panel-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/a/a0/Windows_10_Calendar_app_icon.png');"></div>
+                            <div class="search-panel-item-text">Calendar</div>
+                        </div>
+                    </div>
+                    <div class="search-panel-section">
+                        <h3>Recent searches</h3>
+                        <div class="search-panel-item">
+                            <div class="search-panel-item-text">Windows settings</div>
+                        </div>
+                        <div class="search-panel-item">
+                            <div class="search-panel-item-text">Command Prompt</div>
+                        </div>
+                        <div class="search-panel-item">
+                            <div class="search-panel-item-text">File Explorer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Start Menu -->
+            <div class="start-menu" id="startMenu">
+                <div class="search-box">
+                    <input type="text" placeholder="Type here to search">
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Pinned</h3>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/9/98/Microsoft_Edge_logo_%282019%29.svg');"></div>
+                        <div class="menu-item-text">Edge</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28Windows_10%29.png');"></div>
+                        <div class="menu-item-text">Mail</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/a/a0/Windows_10_Calendar_app_icon.png');"></div>
+                        <div class="menu-item-text">Calendar</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/34/Windows_Store_icon_%282019%E2%80%93present%29.png');"></div>
+                        <div class="menu-item-text">Microsoft Store</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/eb/Windows_10_Photos_app_icon.png');"></div>
+                        <div class="menu-item-text">Photos</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/0d/Windows_10_Settings_app_icon.png');"></div>
+                        <div class="menu-item-text">Settings</div>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Office</h3>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Satituite</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Adobe Creative Cloud Express</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Spotify</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Disney+</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Xbox</div>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Clipchimp</h3>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Prime Video</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Instagram</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">TikTok</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Facebook</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Calculator</div>
+                    </div>
+                </div>
+                
+                <div class="menu-divider"></div>
+                
+                <div class="menu-section">
+                    <h3>Recommended</h3>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 1 | personalization taskbar</div>
+                        <div class="menu-item-time">14m ago</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 2 | personalization dark m...</div>
+                        <div class="menu-item-time">23m ago</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 3 | personalization colors</div>
+                        <div class="menu-item-time">30m ago</div>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <h3>Rebind Moore-Colyer</h3>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 1 | personalization taskbar</div>
+                        <div class="menu-item-time">17m ago</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 2 | personalization light a...</div>
+                        <div class="menu-item-time">28m ago</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 3 | start menu folders</div>
+                        <div class="menu-item-time">1h ago</div>
+                    </div>
+                </div>
+                
+                <div class="menu-divider"></div>
+                
+                <div class="menu-section">
+                    <h3>More</h3>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 1 | personalization taskbar</div>
+                        <div class="menu-item-time">17m ago</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 2 | personalization light a...</div>
+                        <div class="menu-item-time">28m ago</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="menu-item-text">Windows 3 | start menu folders</div>
+                        <div class="menu-item-time">1h ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="taskbar">
+                <div class="taskbar-icons">
+                    <div class="windows-logo" id="windowsLogo"></div>
+                    <div class="search-icon" id="searchIcon"></div>
+                </div>
+                <div class="time-display" id="current-time">
+                    <div class="calendar-popup" id="calendarPopup">
+                        <div class="calendar-header">
+                            <span class="calendar-month-year" id="calendarMonthYear">May 2025</span>
+                            <div class="calendar-nav">
+                                <button id="prevMonth">&lt;</button>
+                                <button id="nextMonth">&gt;</button>
+                            </div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- Days will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command Prompt Window -->
+        <div class="cmd-window" id="cmdWindow">
+            <div class="cmd-titlebar">
+                <div class="cmd-title">Command Prompt</div>
+                <button class="cmd-close" id="cmdClose">✕</button>
+            </div>
+            <div class="cmd-content" id="cmdContent">
+Microsoft Windows [Version 0.0.9:2008-2023]
+(c) Microsoft Corporation, All rights reserved.
+
+C:\Users\User&gt; <span id="cmdCurrentInput"></span><span class="cmd-cursor">|</span>
+            </div>
+            <div class="cmd-input">
+                <span class="cmd-prompt">C:\Users\User&gt;</span>
+                <input type="text" class="cmd-input-field" id="cmdInput" autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Windows 1.0 Desktop -->
+        <div class="win10-desktop" id="win10Desktop">
+            <div class="win10-close" id="win10Close">X</div>
+        </div>
+
+        <div class="setup-footer">
+            <button class="btn btn-back" id="backBtn" disabled>Back</button>
+            <button class="btn btn-next" id="nextBtn">Next</button>
+            <div class="progress-steps">
+                <div class="progress-step" id="step1">1 Collecting information</div>
+                <div class="progress-step" id="step2">2 Installing Windows</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom Cursor Logic
+        const customCursor = document.getElementById('customCursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            customCursor.style.left = `${e.clientX}px`;
+            customCursor.style.top = `${e.clientY}px`;
+        });
+        
+        document.addEventListener('mousedown', () => {
+            customCursor.classList.add('clicked');
+        });
+        
+        document.addEventListener('mouseup', () => {
+            customCursor.classList.remove('clicked');
+        });
+
+        let currentTheme = 1;
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const installBtn = document.getElementById('installBtn');
+        const repairBtn = document.getElementById('repairBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const useDeviceBtn = document.getElementById('useDeviceBtn');
+        const troubleshootBtn = document.getElementById('troubleshootBtn');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const calendarPopup = document.getElementById('calendarPopup');
+        const windowsLogo = document.getElementById('windowsLogo');
+        const startMenu = document.getElementById('startMenu');
+        const cmdIcon = document.getElementById('cmdIcon');
+        const cmdWindow = document.getElementById('cmdWindow');
+        const cmdClose = document.getElementById('cmdClose');
+        const cmdInput = document.getElementById('cmdInput');
+        const cmdContent = document.getElementById('cmdContent');
+        const cmdCurrentInput = document.getElementById('cmdCurrentInput');
+        const win10Desktop = document.getElementById('win10Desktop');
+        const win10Close = document.getElementById('win10Close');
+        const searchIcon = document.getElementById('searchIcon');
+        const searchPanel = document.getElementById('searchPanel');
+        const searchPanelInput = document.getElementById('searchPanelInput');
+
+        // Define the navigation flow - FIXED VERSION
+        const themeFlow = {
+            1: 2,    // Language → Install/Repair
+            2: {     // Install/Repair now has separate paths
+                install: 3,   // Install → Product Key
+                repair: '2a'  // Repair → Troubleshoot
+            },
+            '2a': null, // Troubleshoot (end of path)
+            3: 4,     // Product Key → License Terms
+            4: 5,     // License Terms → OS Selection
+            5: 6,     // OS Selection → Disk Selection
+            6: 7,     // Disk Selection → Installation
+            7: null   // Installation complete
+        };
+
+        // Track the current path (install or repair)
+        let currentPath = 'install';
+
+        function showTheme(themeNum) {
+            document.querySelectorAll('.setup-content').forEach(theme => {
+                theme.classList.add('hidden');
+            });
+            document.getElementById(`theme${themeNum}`).classList.remove('hidden');
+            
+            backBtn.disabled = (themeNum === 1);
+            
+            // Update button visibility and text
+            if (themeNum === '2a') {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'block';
+                nextBtn.textContent = (themeNum === 7) ? 'Finish' : 'Next';
+            }
+            
+            // Update progress steps
+            document.querySelectorAll('.progress-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            if (themeNum < 6 && themeNum !== '2a') {
+                document.getElementById('step1').classList.add('active');
+            } else if (themeNum !== '2a') {
+                document.getElementById('step2').classList.add('active');
+            }
+        }
+
+        function navigateForward() {
+            let nextTheme;
+            
+            // Handle the special case for theme 2 (install/repair choice)
+            if (currentTheme === 2) {
+                nextTheme = themeFlow[currentTheme][currentPath];
+            } else {
+                nextTheme = themeFlow[currentTheme];
+            }
+            
+            if (nextTheme !== null && nextTheme !== undefined) {
+                currentTheme = nextTheme;
+                showTheme(currentTheme);
+                
+                // Simulate installation progress on theme 7
+                if (currentTheme === 7) {
+                    simulateInstallation();
+                }
+            } else if (currentTheme === 7) {
+                showWindowsDesktop();
+            }
+        }
+
+        function navigateBackward() {
+            // Find the previous theme in the flow
+            let prevTheme = null;
+            
+            // Special handling for theme 3 (coming back from install path)
+            if (currentTheme === 3) {
+                prevTheme = 2;
+                currentPath = 'install';
+            } 
+            // Special handling for theme 2a (coming back from repair path)
+            else if (currentTheme === '2a') {
+                prevTheme = 2;
+                currentPath = 'repair';
+            }
+            // Normal backward navigation
+            else {
+                for (const [from, to] of Object.entries(themeFlow)) {
+                    // Handle both simple values and objects
+                    const toValue = typeof to === 'object' ? to.install : to;
+                    if (toValue === currentTheme || toValue === currentTheme.toString()) {
+                        prevTheme = parseFloat(from);
+                        break;
+                    }
+                }
+            }
+            
+            if (prevTheme !== null && prevTheme !== undefined) {
+                currentTheme = prevTheme;
+                showTheme(currentTheme);
+            }
+        }
+
+        function simulateInstallation() {
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            
+            // Animate each status
+            animateStatus('status1', 100, 1000);
+            setTimeout(() => animateStatus('status2', 100, 1500), 1000);
+            setTimeout(() => animateStatus('status3', 100, 2000), 2500);
+            setTimeout(() => animateStatus('status4', 100, 1800), 4500);
+            setTimeout(() => animateStatus('status5', 100, 1200), 6300);
+            
+            // Main progress bar
+            const interval = setInterval(() => {
+                progress += Math.random() * 3;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(showWindowsDesktop, 2000);
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 100);
+        }
+
+        function animateStatus(elementId, target, duration) {
+            let current = 0;
+            const element = document.getElementById(elementId);
+            const increment = target / (duration / 50);
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = `(${Math.round(current)}%)`;
+            }, 50);
+        }
+
+        function showWindowsDesktop() {
+            document.getElementById('windowsDesktop').style.display = 'block';
+            document.querySelector('.setup-footer').style.display = 'none';
+            
+            // Update the time immediately and then every minute
+            updateTime();
+            setInterval(updateTime, 60000);
+            
+            // Initialize calendar
+            updateCalendar();
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            
+            // Format the time according to your locale
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            timeElement.firstChild.textContent = timeString + ' ';
+        }
+
+        function updateCalendar() {
+            const now = new Date();
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            const today = now.getDate();
+
+            document.getElementById('calendarMonthYear').textContent = 
+                new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            let calendarHTML = '';
+            
+            // Day headers (Sun-Sat)
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayNames.forEach(day => {
+                calendarHTML += `<div class="calendar-day-header">${day}</div>`;
+            });
+
+            // Previous month's days
+            for (let i = 0; i < firstDay; i++) {
+                const day = daysInPrevMonth - firstDay + i + 1;
+                calendarHTML += `<div class="calendar-day other-month">${day}</div>`;
+            }
+
+            // Current month's days
+            for (let i = 1; i <= daysInMonth; i++) {
+                const isToday = (i === today);
+                calendarHTML += `<div class="calendar-day ${isToday ? 'today' : ''}">${i}</div>`;
+            }
+
+            // Next month's days (to fill the grid)
+            const totalCells = 42; // 6 rows x 7 days
+            const remainingCells = totalCells - (firstDay + daysInMonth);
+            for (let i = 1; i <= remainingCells; i++) {
+                calendarHTML += `<div class="calendar-day other-month">${i}</div>`;
+            }
+
+            document.getElementById('calendarGrid').innerHTML = calendarHTML;
+        }
+
+        // Toggle calendar on clock click
+        currentTimeDisplay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            calendarPopup.classList.toggle('visible');
+        });
+
+        // Close calendar when clicking outside
+        document.addEventListener('click', () => {
+            calendarPopup.classList.remove('visible');
+        });
+
+        // Prevent calendar from closing when clicking inside it
+        calendarPopup.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Toggle start menu on Windows logo click
+        windowsLogo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startMenu.classList.toggle('visible');
+            searchPanel.classList.remove('visible');
+        });
+
+        // Toggle search panel on search icon click
+        searchIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            searchPanel.classList.toggle('visible');
+            startMenu.classList.remove('visible');
+            if (searchPanel.classList.contains('visible')) {
+                searchPanelInput.focus();
+            }
+        });
+
+        // Close start menu and search panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!startMenu.contains(e.target) && e.target !== windowsLogo) {
+                startMenu.classList.remove('visible');
+            }
+            if (!searchPanel.contains(e.target) && e.target !== searchIcon) {
+                searchPanel.classList.remove('visible');
+            }
+        });
+
+        // Toggle Command Prompt window
+        cmdIcon.addEventListener('click', () => {
+            cmdWindow.classList.add('visible');
+            cmdInput.focus();
+        });
+
+        // Close Command Prompt window
+        cmdClose.addEventListener('click', () => {
+            cmdWindow.classList.remove('visible');
+        });
+
+        // Handle Command Prompt input
+        cmdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = cmdInput.value.trim();
+                cmdInput.value = '';
+                
+                // Add the command to the output
+                cmdContent.innerHTML += `<span class="cmd-input-line">${command}</span>\n`;
+                
+                // Process the command
+                if (command.toLowerCase() === 'win1.0-start') {
+                    win10Desktop.style.display = 'block';
+                    cmdContent.innerHTML += 'Starting Windows 1.0...\n';
+                } else if (command.toLowerCase() === 'chrome.exe-start') {
+                    // Create Chrome window with iframe and fallback
+                    const chromeWindow = document.createElement('div');
+                    chromeWindow.className = 'chrome-window';
+                    chromeWindow.innerHTML = `
+                        <div class="chrome-titlebar">
+                            <div class="chrome-title">Google Chrome</div>
+                            <button class="chrome-close" id="chromeClose">✕</button>
+                        </div>
+                        <div class="chrome-tabs">
+                            <div class="chrome-tab active">Google</div>
+                            <div class="chrome-tab">New Tab</div>
+                        </div>
+                        <div class="chrome-toolbar">
+                            <div class="chrome-address-bar">https://www.google.com</div>
+                        </div>
+                        <div class="chrome-iframe-container">
+                            <iframe class="chrome-iframe" src="https://www.google.com" frameborder="0"></iframe>
+                            <div class="chrome-iframe-fallback hidden">
+                                <div class="chrome-search-container">
+                                    <div class="chrome-logo"></div>
+                                    <input type="text" class="chrome-search" placeholder="Search Google or type a URL">
+                                    <div class="chrome-search-buttons">
+                                        <button class="chrome-search-btn">Google Search</button>
+                                        <button class="chrome-search-btn">I'm Feeling Lucky</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(chromeWindow);
+                    
+                    // Add close handler
+                    const chromeClose = chromeWindow.querySelector('#chromeClose');
+                    chromeClose.addEventListener('click', () => {
+                        chromeWindow.remove();
+                    });
+                    
+                    // Make window draggable
+                    const chromeTitlebar = chromeWindow.querySelector('.chrome-titlebar');
+                    chromeTitlebar.addEventListener('mousedown', (e) => {
+                        if (e.target === chromeTitlebar || e.target === chromeWindow.querySelector('.chrome-title')) {
+                            const startX = e.clientX;
+                            const startY = e.clientY;
+                            const startLeft = parseInt(window.getComputedStyle(chromeWindow).left, 10);
+                            const startTop = parseInt(window.getComputedStyle(chromeWindow).top, 10);
+                            
+                            function moveWindow(e) {
+                                chromeWindow.style.left = `${startLeft + e.clientX - startX}px`;
+                                chromeWindow.style.top = `${startTop + e.clientY - startY}px`;
+                            }
+                            
+                            function stopMoving() {
+                                document.removeEventListener('mousemove', moveWindow);
+                                document.removeEventListener('mouseup', stopMoving);
+                            }
+                            
+                            document.addEventListener('mousemove', moveWindow);
+                            document.addEventListener('mouseup', stopMoving);
+                        }
+                    });
+                    
+                    // Handle tab switching
+                    const chromeTabs = chromeWindow.querySelectorAll('.chrome-tab');
+                    chromeTabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            chromeTabs.forEach(t => t.classList.remove('active'));
+                            tab.classList.add('active');
+                            const iframeContainer = chromeWindow.querySelector('.chrome-iframe-container');
+                            const iframe = chromeWindow.querySelector('.chrome-iframe');
+                            const fallback = chromeWindow.querySelector('.chrome-iframe-fallback');
+                            
+                            if (tab.textContent === 'Google') {
+                                iframeContainer.style.display = 'block';
+                                iframe.src = 'https://www.google.com';
+                                fallback.classList.add('hidden');
+                            } else {
+                                iframeContainer.style.display = 'block';
+                                iframe.src = 'about:blank';
+                                fallback.classList.add('hidden');
+                            }
+                        });
+                    });
+                    
+                    // Check if iframe loaded successfully
+                    const iframe = chromeWindow.querySelector('.chrome-iframe');
+                    const fallback = chromeWindow.querySelector('.chrome-iframe-fallback');
+                    
+                    iframe.onload = function() {
+                        // If iframe loaded successfully, hide fallback
+                        fallback.classList.add('hidden');
+                    };
+                    
+                    iframe.onerror = function() {
+                        // If iframe failed to load, show fallback
+                        fallback.classList.remove('hidden');
+                        iframe.style.display = 'none';
+                    };
+                    
+                    cmdContent.innerHTML += 'Starting Google Chrome...\n';
+                } else if (command.toLowerCase() === 'help') {
+                    cmdContent.innerHTML += 'Available commands:\n';
+                    cmdContent.innerHTML += 'win1.0-start - Launch Windows 1.0\n';
+                    cmdContent.innerHTML += 'chrome.exe-start - Launch Google Chrome\n';
+                    cmdContent.innerHTML += 'help - Show this help message\n';
+                    cmdContent.innerHTML += 'cls - Clear the screen\n';
+                } else if (command.toLowerCase() === 'cls') {
+                    cmdContent.innerHTML = '';
+                } else if (command) {
+                    cmdContent.innerHTML += `'${command}' is not recognized as an internal or external command,\noperable program or batch file.\n`;
+                }
+                
+                // Add new prompt
+                cmdContent.innerHTML += 'C:\\Users\\User&gt; ';
+                
+                // Scroll to bottom
+                cmdContent.scrollTop = cmdContent.scrollHeight;
+            }
+        });
+
+        // Close Windows 1.0 desktop
+        win10Close.addEventListener('click', () => {
+            win10Desktop.style.display = 'none';
+        });
+
+        // Close Windows 1.0 with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && win10Desktop.style.display === 'block') {
+                win10Desktop.style.display = 'none';
+            }
+        });
+
+        // Set up install/repair button handlers
+        installBtn.addEventListener('click', () => {
+            currentPath = 'install';
+            navigateForward();
+        });
+
+        repairBtn.addEventListener('click', () => {
+            currentPath = 'repair';
+            navigateForward();
+        });
+
+        // Set up next/back button handlers
+        nextBtn.addEventListener('click', navigateForward);
+        backBtn.addEventListener('click', navigateBackward);
+
+        // Initialize
+        showTheme(1);
+    </script>
+</body>
+</html>

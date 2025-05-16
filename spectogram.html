@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrogram Viewer</title>
+    <style>
+        :root {
+            --bg-color: #2d2d2d;
+            --panel-color: #3a3a3a;
+            --text-color: #e0e0e0;
+            --highlight-color: #4a8bfc;
+            --border-color: #4a4a4a;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            margin: 0;
+            color: var(--highlight-color);
+        }
+        
+        .filename-display {
+            font-size: 18px;
+            color: #aaa;
+            font-style: italic;
+            max-width: 50%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .player-panel {
+            background-color: var(--panel-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .waveform-container {
+            position: relative;
+            height: 150px;
+            margin-bottom: 20px;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        /* Hide the default waveform canvas */
+        #waveform {
+            display: none;
+        }
+        
+        /* New styles for the full-screen bar visualizer */
+        .waveform-visualizer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 2px;
+            padding: 0 2px;
+        }
+
+        .waveform-bar {
+            background-color: var(--highlight-color);
+            flex: 1;
+            min-width: 0;
+            min-height: 1px;
+            border-radius: 2px 2px 0 0;
+            transition: height 0.05s ease-out;
+            opacity: 0.8;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background-color: #4a4a4a;
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: var(--highlight-color);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        select, input[type="range"] {
+            background-color: #4a4a4a;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            height: 36px;
+        }
+        
+        .spectrogram-container {
+            position: relative;
+            height: 500px;
+            background-color: #000;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        #spectrogram {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .color-scale {
+            height: 20px;
+            margin-top: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .zoom-controls button {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            background-color: var(--highlight-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .file-label:hover {
+            background-color: #3a7be0;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        label {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MP3 Spectrogram Viewer</h1>
+            <div class="filename-display" id="filenameDisplay">No file loaded</div>
+        </div>
+        
+        <div class="player-panel">
+            <div class="controls">
+                <input type="file" id="fileInput" class="file-input" accept="audio/mp3,audio/*">
+                <label for="fileInput" class="file-label">Choose MP3</label>
+                
+                <button id="playBtn" disabled>Play</button>
+                <button id="pauseBtn" disabled>Pause</button>
+                <button id="stopBtn" disabled>Stop</button>
+                
+                <div class="control-group">
+                    <label for="colorScale">Colour/Color:</label>
+                    <select id="colorScale">
+                        <option value="audacity">Audacity</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="heat">Heat</option>
+                        <option value="cool">Cool</option>
+                        <option value="grayscale">Grayscale</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="fftSize">FFT Size:</label>
+                    <select id="fftSize">
+                        <option value="256">256</option>
+                        <option value="512" selected>512</option>
+                        <option value="1024">1024</option>
+                        <option value="2048">2048</option>
+                        <option value="4096">4096</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="gainSlider">Gain:</label>
+                    <input type="range" id="gainSlider" min="0" max="200" value="100">
+                </div>
+            </div>
+            
+            <div class="waveform-container">
+                <div class="waveform-visualizer" id="waveformVisualizer"></div>
+                <canvas id="waveform"></canvas>
+            </div>
+            
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        
+        <div class="player-panel">
+            <div class="spectrogram-container">
+                <div class="zoom-controls">
+                    <button id="zoomIn" title="Zoom In">+</button>
+                    <button id="zoomOut" title="Zoom Out">-</button>
+                    <button id="zoomReset" title="Reset Zoom">↻</button>
+                </div>
+                <canvas id="spectrogram"></canvas>
+            </div>
+            <div class="color-scale" id="colorScaleDisplay"></div>
+            <div class="status" id="status">Load an MP3 file to begin</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js@7"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const fileInput = document.getElementById('fileInput');
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const colorScaleSelect = document.getElementById('colorScale');
+            const fftSizeSelect = document.getElementById('fftSize');
+            const gainSlider = document.getElementById('gainSlider');
+            const currentTimeDisplay = document.getElementById('currentTime');
+            const durationDisplay = document.getElementById('duration');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const zoomResetBtn = document.getElementById('zoomReset');
+            const statusDisplay = document.getElementById('status');
+            const colorScaleDisplay = document.getElementById('colorScaleDisplay');
+            const filenameDisplay = document.getElementById('filenameDisplay');
+            const waveformVisualizer = document.getElementById('waveformVisualizer');
+            
+            // Canvas contexts
+            const waveformCanvas = document.getElementById('waveform');
+            const spectrogramCanvas = document.getElementById('spectrogram');
+            const waveformCtx = waveformCanvas.getContext('2d');
+            const spectrogramCtx = spectrogramCanvas.getContext('2d', { willReadFrequently: true });
+            
+            // Audio variables
+            let audioContext;
+            let analyser;
+            let audioBuffer;
+            let audioSource;
+            let isPlaying = false;
+            let startTime;
+            let playStartOffset = 0;
+            let animationId;
+            let gainNode;
+            
+            // Spectrogram variables
+            let spectrogramData = [];
+            const maxSpectrogramWidth = 2000;
+            let zoomLevel = 1;
+            let zoomOffset = 0;
+            
+            // Bar visualizer variables
+            const barCount = 64; // Increased number of bars for better coverage
+            let waveformBars = [];
+            
+            // Initialize
+            createWaveformBars();
+            updateColorScaleDisplay();
+            resizeCanvases();
+            
+            // Event listeners
+            window.addEventListener('resize', resizeCanvases);
+            fileInput.addEventListener('change', handleFileSelect);
+            playBtn.addEventListener('click', playAudio);
+            pauseBtn.addEventListener('click', pauseAudio);
+            stopBtn.addEventListener('click', stopAudio);
+            colorScaleSelect.addEventListener('change', updateColorScaleDisplay);
+            zoomInBtn.addEventListener('click', () => adjustZoom(1.5));
+            zoomOutBtn.addEventListener('click', () => adjustZoom(0.67));
+            zoomResetBtn.addEventListener('click', resetZoom);
+            gainSlider.addEventListener('input', updateGain);
+            fftSizeSelect.addEventListener('change', updateFFTSize);
+            
+            function createWaveformBars() {
+                waveformVisualizer.innerHTML = '';
+                waveformBars = [];
+                
+                for (let i = 0; i < barCount; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'waveform-bar';
+                    waveformVisualizer.appendChild(bar);
+                    waveformBars.push(bar);
+                }
+            }
+            
+            function updateWaveformVisualizer(frequencyData) {
+                if (!frequencyData || frequencyData.length === 0) return;
+                
+                // Group frequency data into the number of bars we have
+                const groupSize = Math.floor(frequencyData.length / barCount);
+                
+                for (let i = 0; i < barCount; i++) {
+                    // Calculate average value for this group
+                    let sum = 0;
+                    const start = i * groupSize;
+                    const end = Math.min(start + groupSize, frequencyData.length);
+                    
+                    for (let j = start; j < end; j++) {
+                        sum += frequencyData[j];
+                    }
+                    
+                    const avg = sum / (end - start);
+                    
+                    // Scale the height (0-100% of container height)
+                    const heightPercent = (avg / 255) * 100;
+                    waveformBars[i].style.height = `${heightPercent}%`;
+                    
+                    // Add some color variation based on frequency and amplitude
+                    const hue = (i / barCount) * 360;
+                    const saturation = 80 + (heightPercent / 100) * 20;
+                    const lightness = 40 + (heightPercent / 100) * 30;
+                    waveformBars[i].style.backgroundColor = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.9)`;
+                    
+                    // Add subtle glow effect to taller bars
+                    if (heightPercent > 70) {
+                        waveformBars[i].style.boxShadow = `0 0 ${heightPercent/20}px hsla(${hue}, 100%, 50%, 0.5)`;
+                    } else {
+                        waveformBars[i].style.boxShadow = 'none';
+                    }
+                }
+            }
+            
+            function initAudioContext() {
+                // Fix for Web Audio API autoplay policy
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = parseInt(fftSizeSelect.value);
+                analyser.smoothingTimeConstant = 0.8;
+                
+                // Create a gain node for volume control
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = gainSlider.value / 100;
+            }
+            
+            function handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                // Update filename display
+                filenameDisplay.textContent = file.name;
+                filenameDisplay.title = file.name;
+                
+                statusDisplay.textContent = 'Loading file...';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const audioData = e.target.result;
+                    
+                    // Initialize audio context on user interaction
+                    if (!audioContext) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    
+                    audioContext.decodeAudioData(audioData).then(function(buffer) {
+                        audioBuffer = buffer;
+                        
+                        // Reset spectrogram
+                        spectrogramData = [];
+                        spectrogramCtx.clearRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
+                        zoomLevel = 1;
+                        zoomOffset = 0;
+                        
+                        // Enable playback controls
+                        playBtn.disabled = false;
+                        stopBtn.disabled = false;
+                        durationDisplay.textContent = formatTime(buffer.duration);
+                        
+                        statusDisplay.textContent = 'File loaded: ' + file.name;
+                    }).catch(function(err) {
+                        console.error('Error decoding audio data', err);
+                        statusDisplay.textContent = 'Error loading file: ' + err.message;
+                        filenameDisplay.textContent = 'Error loading file';
+                    });
+                };
+                reader.onerror = function() {
+                    statusDisplay.textContent = 'Error reading file';
+                    filenameDisplay.textContent = 'Error reading file';
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            
+            function playAudio() {
+                if (!audioBuffer) return;
+                
+                // Resume audio context if it was suspended
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                initAudioContext();
+                
+                // Stop any existing source
+                if (audioSource) {
+                    audioSource.stop();
+                    audioSource.disconnect();
+                }
+                
+                // Create new source
+                audioSource = audioContext.createBufferSource();
+                audioSource.buffer = audioBuffer;
+                audioSource.loop = false;
+                
+                // Connect nodes: source -> gain -> analyser -> destination
+                audioSource.connect(gainNode);
+                gainNode.connect(analyser);
+                analyser.connect(audioContext.destination);
+                
+                // Start playback
+                startTime = audioContext.currentTime;
+                playStartOffset = 0;
+                audioSource.start(0);
+                
+                // Update UI
+                isPlaying = true;
+                playBtn.disabled = true;
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                statusDisplay.textContent = 'Playing';
+                
+                // Start visualization
+                updateSpectrogram();
+            }
+            
+            function pauseAudio() {
+                if (!audioSource) return;
+                
+                audioSource.stop();
+                audioSource.disconnect();
+                audioSource = null;
+                
+                // Update UI
+                isPlaying = false;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = false;
+                cancelAnimationFrame(animationId);
+                
+                // Reset bars when paused
+                waveformBars.forEach(bar => {
+                    bar.style.height = '1px';
+                    bar.style.boxShadow = 'none';
+                });
+                
+                statusDisplay.textContent = 'Paused';
+            }
+            
+            function stopAudio() {
+                if (!audioSource) return;
+                
+                audioSource.stop();
+                audioSource.disconnect();
+                audioSource = null;
+                
+                // Update UI
+                isPlaying = false;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                cancelAnimationFrame(animationId);
+                playStartOffset = 0;
+                currentTimeDisplay.textContent = '0:00';
+                
+                // Reset bars when stopped
+                waveformBars.forEach(bar => {
+                    bar.style.height = '1px';
+                    bar.style.boxShadow = 'none';
+                });
+                
+                statusDisplay.textContent = 'Stopped';
+            }
+            
+            function updateGain() {
+                if (gainNode) {
+                    gainNode.gain.value = gainSlider.value / 100;
+                }
+            }
+            
+            function updateFFTSize() {
+                if (analyser) {
+                    analyser.fftSize = parseInt(fftSizeSelect.value);
+                }
+            }
+            
+            function updateSpectrogram() {
+                if (!isPlaying) return;
+                
+                const currentTime = audioContext.currentTime - startTime;
+                currentTimeDisplay.textContent = formatTime(currentTime);
+                
+                // Get frequency data
+                const freqData = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(freqData);
+                
+                // Add to spectrogram data
+                spectrogramData.push(Array.from(freqData));
+                
+                // Update the waveform visualizer
+                updateWaveformVisualizer(freqData);
+                
+                // Draw the spectrogram
+                drawSpectrogramFrame(freqData);
+                
+                // Continue animation
+                animationId = requestAnimationFrame(updateSpectrogram);
+                
+                // Check if playback has finished
+                if (currentTime >= audioBuffer.duration) {
+                    stopAudio();
+                    statusDisplay.textContent = 'Playback finished';
+                }
+            }
+            
+            function drawSpectrogramFrame(freqData) {
+                const canvasWidth = spectrogramCanvas.width;
+                const canvasHeight = spectrogramCanvas.height;
+                const binCount = freqData.length;
+                
+                // Shift existing spectrogram to the left
+                spectrogramCtx.drawImage(spectrogramCanvas, -1, 0);
+                
+                // Clear the rightmost column
+                spectrogramCtx.clearRect(canvasWidth - 1, 0, 1, canvasHeight);
+                
+                // Draw new data on the right
+                for (let i = 0; i < binCount; i++) {
+                    const value = freqData[i] / 255;
+                    const y = canvasHeight - (i / binCount) * canvasHeight;
+                    const height = canvasHeight / binCount;
+                    
+                    spectrogramCtx.fillStyle = getColor(value);
+                    spectrogramCtx.fillRect(canvasWidth - 1, y, 1, height);
+                }
+            }
+            
+            function getColor(value) {
+                const scale = colorScaleSelect.value;
+                value = Math.max(0, Math.min(1, value));
+                
+                if (scale === 'grayscale') {
+                    const intensity = Math.floor(value * 255);
+                    return `rgb(${intensity}, ${intensity}, ${intensity})`;
+                }
+                else if (scale === 'rainbow') {
+                    const hue = Math.floor(value * 300);
+                    return `hsl(${hue}, 100%, 50%)`;
+                }
+                else if (scale === 'heat') {
+                    const r = Math.floor(value * 255);
+                    const g = Math.floor(value * 150);
+                    const b = Math.floor(value * 50);
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
+                else if (scale === 'cool') {
+                    const r = Math.floor(value * 50);
+                    const g = Math.floor(value * 150);
+                    const b = Math.floor(value * 255);
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
+                else { // Audacity default
+                    if (value < 0.1) return '#000000';
+                    if (value < 0.2) return '#1e0c42';
+                    if (value < 0.3) return '#3a1064';
+                    if (value < 0.4) return '#511a7a';
+                    if (value < 0.5) return '#67248e';
+                    if (value < 0.6) return '#7e2fa0';
+                    if (value < 0.7) return '#953cb0';
+                    if (value < 0.8) return '#ad49be';
+                    if (value < 0.9) return '#c458cb';
+                    return '#dc68d7';
+                }
+            }
+            
+            function updateColorScaleDisplay() {
+                const scale = colorScaleSelect.value;
+                
+                if (scale === 'audacity') {
+                    colorScaleDisplay.style.background = 
+                        'linear-gradient(to right, #000000, #1e0c42, #3a1064, #511a7a, #67248e, #7e2fa0, #953cb0, #ad49be, #c458cb, #dc68d7)';
+                }
+                else if (scale === 'rainbow') {
+                    colorScaleDisplay.style.background = 
+                        'linear-gradient(to right, red, yellow, lime, cyan, blue, magenta)';
+                }
+                else if (scale === 'heat') {
+                    colorScaleDisplay.style.background = 
+                        'linear-gradient(to right, #000000, #330000, #661900, #993300, #cc4c00, #ff6600, #ff8000, #ff9933, #ffb366, #ffcc99)';
+                }
+                else if (scale === 'cool') {
+                    colorScaleDisplay.style.background = 
+                        'linear-gradient(to right, #000000, #000033, #000066, #000099, #0000cc, #0000ff, #3366ff, #66a3ff, #99c2ff, #cce0ff)';
+                }
+                else {
+                    colorScaleDisplay.style.background = 
+                        'linear-gradient(to right, #000000, #111111, #222222, #333333, #444444, #555555, #666666, #777777, #888888, #999999, #aaaaaa, #bbbbbb, #cccccc, #dddddd, #eeeeee, #ffffff)';
+                }
+                
+                if (spectrogramData.length > 0) {
+                    drawFullSpectrogram();
+                }
+            }
+            
+            function drawFullSpectrogram() {
+                const canvasWidth = spectrogramCanvas.width;
+                const canvasHeight = spectrogramCanvas.height;
+                const binCount = spectrogramData[0] ? spectrogramData[0].length : 0;
+                const maxDisplayWidth = Math.min(spectrogramData.length, maxSpectrogramWidth);
+                
+                spectrogramCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+                
+                const startIndex = Math.floor(zoomOffset * spectrogramData.length);
+                const endIndex = Math.min(startIndex + Math.floor(maxDisplayWidth / zoomLevel), spectrogramData.length);
+                const step = Math.max(1, (endIndex - startIndex) / canvasWidth);
+                
+                for (let x = 0; x < canvasWidth; x++) {
+                    const dataIndex = Math.floor(startIndex + x * step);
+                    if (dataIndex >= spectrogramData.length) break;
+                    
+                    const frame = spectrogramData[dataIndex];
+                    if (!frame) continue;
+                    
+                    for (let i = 0; i < binCount; i++) {
+                        const value = frame[i] / 255;
+                        const y = canvasHeight - (i / binCount) * canvasHeight;
+                        const height = canvasHeight / binCount;
+                        
+                        spectrogramCtx.fillStyle = getColor(value);
+                        spectrogramCtx.fillRect(x, y, 1, height);
+                    }
+                }
+            }
+            
+            function adjustZoom(factor) {
+                zoomLevel *= factor;
+                zoomLevel = Math.max(0.1, Math.min(10, zoomLevel));
+                drawFullSpectrogram();
+            }
+            
+            function resetZoom() {
+                zoomLevel = 1;
+                zoomOffset = 0;
+                drawFullSpectrogram();
+            }
+            
+            function resizeCanvases() {
+                const containerWidth = document.querySelector('.spectrogram-container').clientWidth;
+                
+                // Set canvas display sizes
+                waveformCanvas.width = waveformCanvas.clientWidth;
+                waveformCanvas.height = waveformCanvas.clientHeight;
+                spectrogramCanvas.width = containerWidth;
+                spectrogramCanvas.height = document.querySelector('.spectrogram-container').clientHeight;
+                
+                // Redraw if we have data
+                if (spectrogramData.length > 0) {
+                    drawFullSpectrogram();
+                }
+            }
+            
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+        });
+    </script>
+</body>
+</html>

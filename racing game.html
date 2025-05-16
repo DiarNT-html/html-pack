@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cursor Racing Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+    }
+    #gameCanvas {
+      display: block;
+      background: linear-gradient(#555, #222);
+    }
+    #player {
+      position: absolute;
+      width: 40px;
+      height: 80px;
+      background: red;
+      border-radius: 10px;
+      transition: top 0.05s, left 0.05s;
+    }
+    .obstacle {
+      position: absolute;
+      width: 40px;
+      height: 80px;
+      background: #fff;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div id="player"></div>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const player = document.getElementById('player');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let obstacles = [];
+    let score = 0;
+
+    function createObstacle() {
+      const x = Math.random() * (canvas.width - 40);
+      const obstacle = document.createElement('div');
+      obstacle.classList.add('obstacle');
+      obstacle.style.top = '0px';
+      obstacle.style.left = `${x}px`;
+      document.body.appendChild(obstacle);
+      obstacles.push({ el: obstacle, x, y: 0 });
+    }
+
+    function updateObstacles() {
+      obstacles.forEach((obs, index) => {
+        obs.y += 5;
+        obs.el.style.top = `${obs.y}px`;
+        if (obs.y > canvas.height) {
+          obs.el.remove();
+          obstacles.splice(index, 1);
+          score++;
+        }
+      });
+    }
+
+    function checkCollision() {
+      const playerRect = player.getBoundingClientRect();
+      for (let obs of obstacles) {
+        const obsRect = obs.el.getBoundingClientRect();
+        if (
+          playerRect.left < obsRect.right &&
+          playerRect.right > obsRect.left &&
+          playerRect.top < obsRect.bottom &&
+          playerRect.bottom > obsRect.top
+        ) {
+          alert('Game Over! Score: ' + score);
+          window.location.reload();
+        }
+      }
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      player.style.left = `${e.clientX - 20}px`;
+      player.style.top = `${e.clientY - 40}px`;
+    });
+
+    setInterval(() => {
+      createObstacle();
+    }, 800);
+
+    function gameLoop() {
+      updateObstacles();
+      checkCollision();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>

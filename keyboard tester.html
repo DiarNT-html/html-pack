@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP TrueVision Style QWERTZ Keyboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background-color: #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            width: 950px;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+        
+        .key {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f8f8;
+            color: #333;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 3px 0 #ccc;
+            transition: all 0.1s;
+            position: relative;
+            border: 1px solid #d0d0d0;
+        }
+        
+        .key:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .key:active, .key.active {
+            background-color: #ff8c00;
+            color: white;
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #ccc;
+        }
+        
+        .key.space {
+            width: 350px;
+        }
+        
+        .key.tab {
+            width: 80px;
+        }
+        
+        .key.caps {
+            width: 90px;
+        }
+        
+        .key.enter {
+            width: 100px;
+        }
+        
+        .key.shift-left {
+            width: 120px;
+        }
+        
+        .key.shift-right {
+            width: 110px;
+        }
+        
+        .key.ctrl, .key.alt, .key.meta {
+            width: 70px;
+            font-size: 14px;
+        }
+        
+        .key.backspace {
+            width: 90px;
+        }
+        
+        .key.backslash {
+            width: 80px;
+        }
+        
+        .key.space {
+            width: 400px;
+        }
+        
+        .key.fn {
+            width: 60px;
+            background-color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .key.sub-label {
+            font-size: 10px;
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            color: #777;
+        }
+        
+        .key.sub-label.left {
+            left: 5px;
+            right: auto;
+        }
+        
+        /* Special HP TrueVision style keys */
+        .key.hp-special {
+            background-color: #e6e6e6;
+        }
+        
+        .key.media {
+            background-color: #e0e0e0;
+            font-size: 12px;
+        }
+        
+        /* Function row styling */
+        .function-row .key {
+            height: 40px;
+            background-color: #e8e8e8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>HP TrueVision Style QWERTZ Keyboard</h1>
+    <p>Press keys on your physical keyboard to highlight them</p>
+    
+    <div class="keyboard">
+        <!-- Function Row -->
+        <div class="keyboard-row function-row">
+            <div class="key hp-special" data-code="Escape">Esc</div>
+            <div class="key" data-code="F1">F1</div>
+            <div class="key" data-code="F2">F2</div>
+            <div class="key" data-code="F3">F3</div>
+            <div class="key" data-code="F4">F4</div>
+            <div class="key" data-code="F5">F5</div>
+            <div class="key" data-code="F6">F6</div>
+            <div class="key" data-code="F7">F7</div>
+            <div class="key" data-code="F8">F8</div>
+            <div class="key" data-code="F9">F9</div>
+            <div class="key" data-code="F10">F10</div>
+            <div class="key" data-code="F11">F11</div>
+            <div class="key" data-code="F12">F12</div>
+            <div class="key hp-special media" data-code="PrintScreen">PrtSc</div>
+            <div class="key hp-special media" data-code="ScrollLock">ScrLk</div>
+            <div class="key hp-special media" data-code="Pause">Pause</div>
+        </div>
+        
+        <!-- First Row -->
+        <div class="keyboard-row">
+            <div class="key" data-code="Backquote">^<span class="sub-label">°</span></div>
+            <div class="key" data-code="Digit1">1<span class="sub-label">!</span></div>
+            <div class="key" data-code="Digit2">2<span class="sub-label">"</span></div>
+            <div class="key" data-code="Digit3">3<span class="sub-label">§</span></div>
+            <div class="key" data-code="Digit4">4<span class="sub-label">$</span></div>
+            <div class="key" data-code="Digit5">5<span class="sub-label">%</span></div>
+            <div class="key" data-code="Digit6">6<span class="sub-label">&</span></div>
+            <div class="key" data-code="Digit7">7<span class="sub-label">/</span></div>
+            <div class="key" data-code="Digit8">8<span class="sub-label">(</span></div>
+            <div class="key" data-code="Digit9">9<span class="sub-label">)</span></div>
+            <div class="key" data-code="Digit0">0<span class="sub-label">=</span></div>
+            <div class="key" data-code="Minus">ß<span class="sub-label">?</span></div>
+            <div class="key" data-code="Equal">´<span class="sub-label">`</span></div>
+            <div class="key backspace" data-code="Backspace">Backspace</div>
+        </div>
+        
+        <!-- Second Row -->
+        <div class="keyboard-row">
+            <div class="key tab" data-code="Tab">Tab</div>
+            <div class="key" data-code="KeyQ">Q</div>
+            <div class="key" data-code="KeyW">W</div>
+            <div class="key" data-code="KeyE">E</div>
+            <div class="key" data-code="KeyR">R</div>
+            <div class="key" data-code="KeyT">T</div>
+            <div class="key" data-code="KeyZ">Z</div>
+            <div class="key" data-code="KeyU">U</div>
+            <div class="key" data-code="KeyI">I</div>
+            <div class="key" data-code="KeyO">O</div>
+            <div class="key" data-code="KeyP">P</div>
+            <div class="key" data-code="BracketLeft">Ü<span class="sub-label"></span></div>
+            <div class="key" data-code="BracketRight">+<span class="sub-label">*</span></div>
+            <div class="key backslash" data-code="Backslash">#<span class="sub-label">'</span></div>
+        </div>
+        
+        <!-- Third Row -->
+        <div class="keyboard-row">
+            <div class="key caps" data-code="CapsLock">Caps Lock</div>
+            <div class="key" data-code="KeyA">A</div>
+            <div class="key" data-code="KeyS">S</div>
+            <div class="key" data-code="KeyD">D</div>
+            <div class="key" data-code="KeyF">F</div>
+            <div class="key" data-code="KeyG">G</div>
+            <div class="key" data-code="KeyH">H</div>
+            <div class="key" data-code="KeyJ">J</div>
+            <div class="key" data-code="KeyK">K</div>
+            <div class="key" data-code="KeyL">L</div>
+            <div class="key" data-code="Semicolon">Ö<span class="sub-label"></span></div>
+            <div class="key" data-code="Quote">Ä<span class="sub-label"></span></div>
+            <div class="key enter" data-code="Enter">Enter</div>
+        </div>
+        
+        <!-- Fourth Row -->
+        <div class="keyboard-row">
+            <div class="key shift-left" data-code="ShiftLeft">Shift</div>
+            <div class="key" data-code="IntlBackslash"><span class="sub-label left"><</span> <span>></span></div>
+            <div class="key" data-code="KeyY">Y</div>
+            <div class="key" data-code="KeyX">X</div>
+            <div class="key" data-code="KeyC">C</div>
+            <div class="key" data-code="KeyV">V</div>
+            <div class="key" data-code="KeyB">B</div>
+            <div class="key" data-code="KeyN">N</div>
+            <div class="key" data-code="KeyM">M</div>
+            <div class="key" data-code="Comma">,<span class="sub-label">;</span></div>
+            <div class="key" data-code="Period">.<span class="sub-label">:</span></div>
+            <div class="key" data-code="Slash">-<span class="sub-label">_</span></div>
+            <div class="key shift-right" data-code="ShiftRight">Shift</div>
+        </div>
+        
+        <!-- Fifth Row -->
+        <div class="keyboard-row">
+            <div class="key fn" data-code="Fn">Fn</div>
+            <div class="key ctrl" data-code="ControlLeft">Ctrl</div>
+            <div class="key meta" data-code="MetaLeft">Win</div>
+            <div class="key alt" data-code="AltLeft">Alt</div>
+            <div class="key space" data-code="Space"> </div>
+            <div class="key alt" data-code="AltRight">Alt Gr</div>
+            <div class="key meta" data-code="MetaRight">Win</div>
+            <div class="key hp-special" data-code="ContextMenu">▤</div>
+            <div class="key ctrl" data-code="ControlRight">Ctrl</div>
+            <div class="key hp-special media" data-code="ArrowLeft">←</div>
+            <div class="key hp-special media" data-code="ArrowUp">↑</div>
+            <div class="key hp-special media" data-code="ArrowDown">↓</div>
+            <div class="key hp-special media" data-code="ArrowRight">→</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const keys = document.querySelectorAll('.key');
+            const keyMap = {};
+            
+            // Create a mapping of key codes to DOM elements
+            keys.forEach(key => {
+                const code = key.dataset.code;
+                if (code) {
+                    keyMap[code] = key;
+                }
+            });
+            
+            // Handle keydown events
+            document.addEventListener('keydown', function(e) {
+                // Special cases for keys that might have different codes
+                let code = e.code;
+                
+                // Handle the '<' key (IntlBackslash on QWERTZ)
+                if (e.key === '<' || e.key === '>') {
+                    code = 'IntlBackslash';
+                }
+                
+                if (keyMap[code]) {
+                    keyMap[code].classList.add('active');
+                }
+                
+                // Also highlight modifier keys if they're pressed
+                if (e.ctrlKey) {
+                    keyMap['ControlLeft']?.classList.add('active');
+                    keyMap['ControlRight']?.classList.add('active');
+                }
+                if (e.shiftKey) {
+                    keyMap['ShiftLeft']?.classList.add('active');
+                    keyMap['ShiftRight']?.classList.add('active');
+                }
+                if (e.altKey) {
+                    keyMap['AltLeft']?.classList.add('active');
+                    keyMap['AltRight']?.classList.add('active');
+                }
+                if (e.metaKey) {
+                    keyMap['MetaLeft']?.classList.add('active');
+                    keyMap['MetaRight']?.classList.add('active');
+                }
+            });
+            
+            // Handle keyup events
+            document.addEventListener('keyup', function(e) {
+                let code = e.code;
+                
+                if (e.key === '<' || e.key === '>') {
+                    code = 'IntlBackslash';
+                }
+                
+                if (keyMap[code]) {
+                    keyMap[code].classList.remove('active');
+                }
+                
+                // Remove highlight from modifier keys if they're released
+                if (!e.ctrlKey) {
+                    keyMap['ControlLeft']?.classList.remove('active');
+                    keyMap['ControlRight']?.classList.remove('active');
+                }
+                if (!e.shiftKey) {
+                    keyMap['ShiftLeft']?.classList.remove('active');
+                    keyMap['ShiftRight']?.classList.remove('active');
+                }
+                if (!e.altKey) {
+                    keyMap['AltLeft']?.classList.remove('active');
+                    keyMap['AltRight']?.classList.remove('active');
+                }
+                if (!e.metaKey) {
+                    keyMap['MetaLeft']?.classList.remove('active');
+                    keyMap['MetaRight']?.classList.remove('active');
+                }
+            });
+            
+            // Also make keys clickable for demonstration
+            keys.forEach(key => {
+                key.addEventListener('mousedown', function() {
+                    this.classList.add('active');
+                });
+                
+                key.addEventListener('mouseup', function() {
+                    this.classList.remove('active');
+                });
+                
+                key.addEventListener('mouseleave', function() {
+                    this.classList.remove('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

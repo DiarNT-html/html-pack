@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+      animation: rainbow 5s linear infinite;
+      text-align: center;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0 0; }
+      100% { background-position: 400% 0; }
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .login-box {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 200px;
+      text-align: center;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .loading-circle {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 100px;
+      height: 100px;
+      border: 10px solid #f3f3f3;
+      border-top: 10px solid #3498db;
+      border-radius: 50%;
+      animation: spin 2s linear infinite;
+      display: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Vítejte v zdarmo Minecraft v počítačí! Prosím se přihlašte aby jste pokračovali</h1>
+
+  <div class="login-box">
+    <input type="text" id="username" placeholder="Zadejte uživatelské jméno" />
+  </div>
+
+  <div class="loading-circle" id="loadingCircle"></div>
+
+  <script>
+    const input = document.getElementById('username');
+    const loadingCircle = document.getElementById('loadingCircle');
+
+    input.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        // Show loading circle
+        loadingCircle.style.display = 'block';
+
+        // Simulate loading time
+        setTimeout(function () {
+          window.location.href = 'https://eaglercraft.com/';
+        }, 2000); // 2 seconds delay for the loading effect
+      }
+    });
+  </script>
+
+</body>
+</html>
